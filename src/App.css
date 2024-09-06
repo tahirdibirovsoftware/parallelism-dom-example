@@ -1,0 +1,14 @@
+.App{
+  width: 100vw;
+  height: 100vh;
+  transition: all linear 80ms;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.App > button{
+  outline: unset;
+}
