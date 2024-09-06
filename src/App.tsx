@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
-import { generateColor } from "./colorGenerator";
-import './App.css';
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { calculatePrimes } from "./cpuIntensive";
 import { Thread } from "parallel-memo-dom";
+import './App.css';
+import { generateColor } from "./colorGenerator";
 
 const App: React.FC = () => {
   const [background, setBackground] = useState<string>('#000000');
@@ -10,25 +10,40 @@ const App: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.style.backgroundColor = background;
-    }
+    const timeOut = setTimeout(() => {
+      if (ref.current) {
+        setBackground(generateColor());
+        ref.current.style.backgroundColor = background;
+      }
+    }, 500);
+
+    return () => clearTimeout(timeOut);
   }, [background]);
 
 
 
-  const handleColorChange = () => {
-    const newColor = generateColor();
-    setBackground(newColor);
-  };
+  const handleCompute = useCallback(() => {
+    Thread.exec(calculatePrimes, 50000000)
+      .then(data => setPrimeNumbers(data.length))
+      .catch(error => console.error("Computation failed:", error));
+  }, []);
+
+
+
+    // const handleCompute = ()=> setPrimeNumbers(calculatePrimes(50000000).length)
+
+
+
+  const handleReset = useCallback(() => {
+    setPrimeNumbers(0);
+  }, []);
 
   return (
     <div ref={ref} className="App">
-      <h1>CPU Intensive operation</h1>
+      <h1>CPU Intensive Operation</h1>
       <h2>{primeNumbers}</h2>
-      <button onClick={handleColorChange}>Change Background</button>
-      <button onClick={()=>Thread.exec(calculatePrimes, 50000000).then(data=>setPrimeNumbers(data.length))}>Compute</button>
-      <button onClick={()=>setPrimeNumbers(0)} className="reset">Reset</button>
+      <button onClick={handleCompute}>Compute</button>
+      <button onClick={handleReset} className="reset">Reset</button>
     </div>
   );
 };
