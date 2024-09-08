@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { calculatePrimes } from './cpuIntensive';
-import './App.css';
 import { Thread } from 'parallel-memo-dom';
 import { generateColor } from './colorGenerator';
+import './App.css';
 
 const TOTAL_RANGE = 35000000;
 
