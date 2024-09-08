@@ -1,10 +1,12 @@
 export const generateColor = (): string => {
-    const hexDigits = '0123456789ABCDEF';
-    let color = '#';
-    
-    for (let i = 0; i < 6; i++) {
-      color += hexDigits[Math.floor(Math.random() * 16)];
-    }
-    
-    return color;
-  }
+  const generateDarkComponent = (): string => {  
+    const value = Math.floor(Math.random() * 128);
+    return value.toString(16).padStart(2, '0');
+  };
+
+  const red = generateDarkComponent();
+  const green = generateDarkComponent();
+  const blue = generateDarkComponent();
+
+  return `#${red}${green}${blue}`;
+};

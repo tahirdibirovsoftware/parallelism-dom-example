@@ -34,3 +34,17 @@
   background-color: #9e9e9e;
   cursor: not-allowed;
 }
+
+.computing-indicator {
+  margin-left: 10px;
+  color: #ff9900;
+  font-weight: bold;
+  animation: blink 1s linear infinite;
+  text-align: center;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

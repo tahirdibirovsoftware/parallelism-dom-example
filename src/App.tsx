@@ -2,68 +2,72 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { calculatePrimes } from './cpuIntensive';
 import './App.css';
 import { Thread } from 'parallel-memo-dom';
+import { generateColor } from './colorGenerator';
 
-const TOTAL_RANGE = 34000000;
+const TOTAL_RANGE = 35000000;
 
 const App: React.FC = () => {
   const [mainThreadPrimes, setMainThreadPrimes] = useState<number>(0);
   const [isolatedThreadPrimes, setIsolatedThreadPrimes] = useState<number>(0);
-  const [isComputing, setIsComputing] = useState<boolean>(false);
+  const [isComputingMain, setIsComputingMain] = useState<boolean>(false);
+  const [isComputingIsolated, setIsComputingIsolated] = useState<boolean>(false);
   const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setBackgroundColor(getRandomColor());
+      setBackgroundColor(generateColor());
     }, 500);
 
     return () => clearInterval(intervalId);
   }, []);
 
-  const getRandomColor = () => {
-    return '#' + Math.floor(Math.random()*16777215).toString(16);
-  };
-
+  //Compute on Main Thread
   const computeOnMainThread = useCallback(() => {
-    setIsComputing(true);
+    setIsComputingMain(true);
     setMainThreadPrimes(0);
 
     setTimeout(() => {
       const primes = calculatePrimes(TOTAL_RANGE);
       setMainThreadPrimes(primes.length);
-      setIsComputing(false);
+      setIsComputingMain(false);
     }, 0);
   }, []);
-
+  
+  //Compute on Isolate Thread
   const computeOnIsolatedThread = useCallback(() => {
-    setIsComputing(true);
+    setIsComputingIsolated(true);
     setIsolatedThreadPrimes(0);
 
     Thread.exec(calculatePrimes, TOTAL_RANGE)
       .then(primes => {
         setIsolatedThreadPrimes(primes.length);
-        setIsComputing(false);
+        setIsComputingIsolated(false);
       })
       .catch(error => {
         console.error("Computation failed:", error);
-        setIsComputing(false);
+        setIsComputingIsolated(false);
       });
   }, []);
 
   const handleReset = useCallback(() => {
     setMainThreadPrimes(0);
     setIsolatedThreadPrimes(0);
-    setIsComputing(false);
+    setIsComputingMain(false);
+    setIsComputingIsolated(false);
   }, []);
+
+  const isComputing = isComputingMain || isComputingIsolated;
 
   return (
     <div className="App" style={{ backgroundColor }}>
-      <h1>CPU Intensive App</h1>
+      <h1>CPU-bound App</h1>
       
       <div className="computation-section">
         <h2>Main Thread: {mainThreadPrimes}</h2>
         <button onClick={computeOnMainThread} disabled={isComputing}>
           Compute on Main Thread
         </button>
+        {isComputingMain && <p className="computing-indicator">Computing...</p>}
       </div>
 
       <div className="computation-section">
@@ -71,6 +75,7 @@ const App: React.FC = () => {
         <button onClick={computeOnIsolatedThread} disabled={isComputing}>
           Compute on Isolated Thread
         </button>
+        {isComputingIsolated && <p className="computing-indicator">Computing...</p>}
       </div>
 
       <div className="reset-section">
